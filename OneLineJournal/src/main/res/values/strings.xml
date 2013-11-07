@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">OneLineJournal</string>
+    <string name="title_section1">Add Day</string>
+    <string name="title_section2">Journal</string>
+    <string name="title_section3">Section 3</string>
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="action_example">Example action</string>
+    <string name="action_settings">Settings</string>
+    <string name="sign_in">Sign In</string>
+    <string name="password">Password</string>
+    <string name="email">Email</string>
+    <string name="btn_sign_up">Sign Up</string>
+    <string name="login_title">Login to One Line Journal</string>
+    <string name="addday_date">Date:</string><string name="addday_day">Day:</string><string name="addday_pick_date">Change date</string><string name="addday_save">Save Day</string>
+
+</resources>

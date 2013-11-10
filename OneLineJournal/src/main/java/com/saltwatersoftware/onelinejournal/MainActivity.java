@@ -3,6 +3,9 @@ package com.saltwatersoftware.onelinejournal;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.ActionBarActivity;
@@ -29,6 +32,9 @@ import java.util.Calendar;
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, DatePickerFragment.OnDateSelectedListener {
     EditText editText2;
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
+    View global_view;
 
     /**
      * Fragment managing the behaviors, interactions and presentation of the navigation drawer.
@@ -44,6 +50,8 @@ public class MainActivity extends ActionBarActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        editor = sharedPreferences.edit();
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -129,10 +137,26 @@ public class MainActivity extends ActionBarActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
+            case R.id.action_example:
+                LogOut();
+                return true;
+
             case R.id.action_settings:
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    public void LogOut(){
+        //editor.putString("token", token);
+        DestroyToken();
+        Intent myIntent=new Intent(MainActivity.this,Login.class);
+        startActivity(myIntent);
+        finish();
+    }
+    public void DestroyToken()
+    {
+        editor.remove("token");
+        editor.apply();
     }
 
     /**

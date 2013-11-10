@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Debug;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -43,7 +44,7 @@ public class Login extends Activity {
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPreferences = getPreferences(0);
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this); //getPreferences(0);
         editor = sharedPreferences.edit();
         String tokenCheck = sharedPreferences.getString("token", "None");
         if (tokenCheck == "None")

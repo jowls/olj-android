@@ -3,8 +3,11 @@ package com.saltwatersoftware.onelinejournal;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
@@ -27,12 +30,15 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.Calendar;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, DatePickerFragment.OnDateSelectedListener {
     EditText editText2;
-    SharedPreferences sharedPreferences;
+    public static SharedPreferences sharedPreferences;
+    public static SqlOpenHelper helper;
+    public static SQLiteDatabase database;
     SharedPreferences.Editor editor;
     View global_view;
 
@@ -63,6 +69,10 @@ public class MainActivity extends ActionBarActivity
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
+
+        //db
+        helper = new SqlOpenHelper(this);
+        database = helper.getWritableDatabase();
     }
 
     public void onDateChanged(int year, int month, int day) {
@@ -87,6 +97,13 @@ public class MainActivity extends ActionBarActivity
         {
             mTitle = "Add Day";
             fragmentManager.beginTransaction().replace(R.id.container, new FragmentAddDay()).commit();
+        }
+        else if (position == 1)
+        {
+            mTitle = "Journal";
+            JournalFragment jf = new JournalFragment();
+            fragmentManager.beginTransaction().replace(R.id.container, jf).commit();
+            //jf.PopulateJournal();
         }
         else
         {
@@ -199,12 +216,15 @@ public class MainActivity extends ActionBarActivity
             ((MainActivity) activity).onSectionAttached(
                     getArguments().getInt(ARG_SECTION_NUMBER));
         }
-
     }
-
 
     public void showDatePickerDialog(View v) {
         DialogFragment newFragment = new DatePickerFragment();
         newFragment.show(getSupportFragmentManager(), "datePicker");
+    }
+
+    private static boolean doesDatabaseExist(ContextWrapper context, String dbName) {
+        File dbFile=context.getDatabasePath(dbName);
+        return dbFile.exists();
     }
 }

@@ -7,7 +7,8 @@
     <uses-sdk
         android:minSdkVersion="9"
         android:targetSdkVersion="19" />
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -15,10 +16,11 @@
         android:label="@string/app_name"
         android:theme="@style/AppCompat" >
         <activity
-            android:name=".Login"
-            android:label="@string/app_name">
+            android:name="com.saltwatersoftware.onelinejournal.Login"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -32,4 +34,5 @@
             </intent-filter>
         </activity>
     </application>
+
 </manifest>

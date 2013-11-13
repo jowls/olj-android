@@ -55,14 +55,31 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
     String transDateString;
     Button btn;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_add_day, container, false);
         btn = (Button) view.findViewById(R.id.button2);
         btn.setOnClickListener(this);
+//        if (savedInstanceState.getString("date") != null)
+//        {
+//            editText2.setText(savedInstanceState.getString("date"));
+//        }
         return view;
     }
+
+//    @Override
+//    public void onSaveInstanceState(Bundle savedInstanceState) {
+//
+//        // Save UI state changes to the savedInstanceState.
+//        // This bundle will be passed to onCreate if the process is
+//        // killed and restarted.
+//
+//        savedInstanceState.putString("date", editText2.toString());
+//        super.onSaveInstanceState(savedInstanceState);
+//
+//        // etc.
+//
+//    }
     @Override
     public void onClick(View v) {
         new AddDayTask().execute();

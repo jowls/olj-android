@@ -2,6 +2,7 @@ package com.saltwatersoftware.onelinejournal;
 
 //import android.app.Fragment;
 import android.content.ContentValues;
+import android.database.Cursor;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -9,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 //import android.support.v4.widget.SearchViewCompatIcs;
+import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -55,19 +57,31 @@ public class JournalFragment extends Fragment {
 
         Context context;
         JSONArray data;
+        Cursor listCursor;
         private LayoutInflater inflater = null;
 
         public yourAdapter(Context context, JSONArray data) {
             // TODO Auto-generated constructor stub
             this.context = context;
             this.data = data;
+            if (data == null)
+            {
+                this.listCursor = MainActivity.database.query("days", new String[]{"date", "content"}, null, null, null, null, String.format("%s DESC", "date"));
+            }
             inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         }
 
         @Override
         public int getCount() {
             // TODO Auto-generated method stub
-            return data.length();
+            if (data != null)
+            {
+                return data.length();
+            }
+            else
+            {
+                return listCursor.getCount();
+            }
         }
 
         @Override
@@ -96,14 +110,26 @@ public class JournalFragment extends Fragment {
                 vi = inflater.inflate(R.layout.row, null);
             TextView date = (TextView) vi.findViewById(R.id.dateText);
             TextView content = (TextView) vi.findViewById(R.id.contentText);
-            try {
-                JSONObject tempObj = data.getJSONObject(position);
-                JSONObject tempDay = tempObj.getJSONObject("day");
-                content.setText(tempDay.optString("content", "NULL"));
-                date.setText(tempDay.optString("date", "NULL"));
-            } catch (JSONException e) {
-                e.printStackTrace();
+//            try {
+//
+//                JSONObject tempObj = data.getJSONObject(position);
+//                JSONObject tempDay = tempObj.getJSONObject("day");
+//                content.setText(tempDay.optString("content", "NULL"));
+//                date.setText(tempDay.optString("date", "NULL"));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+            //ArrayList<Food> foods = new ArrayList(this);
+            listCursor = MainActivity.database.query("days", new String[]{"date", "content"}, null, null, null, null, String.format("%s DESC", "date"));
+            //listCursor.moveToFirst();
+            listCursor.moveToPosition(position);
+            //Food t;
+            if(! listCursor.isAfterLast()) {
+                    date.setText(listCursor.getString(0));
+                    content.setText(listCursor.getString(1));
+                    //String name= listCursor.getString(1);
             }
+            listCursor.close();
             return vi;
         }
     }
@@ -117,59 +143,79 @@ public class JournalFragment extends Fragment {
             HttpClient httpclient = new DefaultHttpClient();
 
             String token  = MainActivity.sharedPreferences.getString("token", "None");
+            Long dbUpdatedMillis = MainActivity.sharedPreferences.getLong("db_updated", -1);
+            Time now = new Time();
+            now.setToNow();
+            Long nowMillis = now.toMillis(true);
             String responseAsText = "Exception";
+            if (dbUpdatedMillis < 0 || (nowMillis-dbUpdatedMillis > 7200000))
+            {
+                try {
+                    JSONObject jsonPost = new JSONObject();
+                    jsonPost.put("at", token);
 
-            try {
-                JSONObject jsonPost = new JSONObject();
-                jsonPost.put("at", token);
+                    String urlPost = "http://oljtrial.cloudapp.net/api/v1/mobiles/alldays";
 
-                String urlPost = "http://oljtrial.cloudapp.net/api/v1/mobiles/alldays";
+                    HttpPost httppost = new HttpPost(urlPost);
+                    StringEntity se = new StringEntity(jsonPost.toString());
+                    httppost.setEntity(se);
+                    httppost.setHeader("Accept", "application/json");
+                    httppost.setHeader("Content-type", "application/json");
+                    HttpResponse response = httpclient.execute(httppost);
 
-                HttpPost httppost = new HttpPost(urlPost);
-                StringEntity se = new StringEntity(jsonPost.toString());
-                httppost.setEntity(se);
-                httppost.setHeader("Accept", "application/json");
-                httppost.setHeader("Content-type", "application/json");
-                HttpResponse response = httpclient.execute(httppost);
+                    responseAsText = EntityUtils.toString(response.getEntity());
 
-                responseAsText = EntityUtils.toString(response.getEntity());
+                } catch (ClientProtocolException e) {
+                    responseAsText = "Client protocol exception";
 
-            } catch (ClientProtocolException e) {
-                responseAsText = "Client protocol exception";
-
-            } catch (IOException e) {
-                responseAsText = "IO Exception";
-            } catch (JSONException e) {
-                e.printStackTrace();
+                } catch (IOException e) {
+                    responseAsText = "IO Exception";
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
             return responseAsText;
         }
 
         protected void onPostExecute(String responseAsText) {
-            //mEditEmail.setText(responseAsText); works ok but was too large.
             Log.w("salt", responseAsText);
             try {
-//                JSONObject jsonJournal = new JSONObject(responseAsText);
-                JSONArray jsonJournal = new JSONArray(responseAsText);
-
-                listview = (ListView) getView().findViewById(R.id.jListView);
-                listview.setAdapter(new yourAdapter(getView().getContext(), jsonJournal));
-
-                for (int i = 0; i < jsonJournal.length(); i++)
+                JSONArray jsonJournal;
+                if (responseAsText != "Exception")
                 {
-                    JSONObject tempObj = jsonJournal.getJSONObject(i);
-                    JSONObject tempDay = tempObj.getJSONObject("day");
-                    String content = tempDay.optString("content", "NULL");
-                    String date = tempDay.optString("date", "NULL");
-                    ContentValues values = new ContentValues();
-                    values.put("date", date);
-                    values.put("content", content);
-                    values.put("updated_at", content);
-//                    todo: handle android.database.sqlite.SQLiteConstraintException: column date is not unique (code 19)
-                    Long id = MainActivity.database.insert("days", null, values);
-                    Log.w("Successfully created row in days table with id: ", id.toString());
-                }
+                    jsonJournal = new JSONArray(responseAsText);
 
+                    for (int i = 0; i < jsonJournal.length(); i++)
+                    {
+                        JSONObject tempObj = jsonJournal.getJSONObject(i);
+                        JSONObject tempDay = tempObj.getJSONObject("day");
+                        String content = tempDay.optString("content", "NULL");
+                        String date = tempDay.optString("date", "NULL");
+                        ContentValues values = new ContentValues();
+                        values.put("date", date);
+                        values.put("content", content);
+                        values.put("updated_at", content);
+//                    todo: handle android.database.sqlite.SQLiteConstraintException: column date is not unique (code 19)
+                        Long id = MainActivity.database.insert("days", null, values);
+                        Log.w("Successfully created row in days table with id: ", id.toString());
+                        Time now = new Time();
+                        now.setToNow();
+                        MainActivity.editor.putLong("db_updated", now.toMillis(true));
+                        MainActivity.editor.apply();
+                    }
+                }else
+                {
+                    jsonJournal = null;
+                }
+                View vw = getView();
+                if (vw != null)
+                {
+                    int id = R.id.jListView;
+                    ListView lv = (ListView)vw.findViewById(id);
+                    //listview = (ListView) getView().findViewById(R.id.jListView);
+                    listview = lv;
+                    listview.setAdapter(new yourAdapter(getView().getContext(), jsonJournal));
+                }
             } catch (JSONException e) {
                 e.printStackTrace();
             }

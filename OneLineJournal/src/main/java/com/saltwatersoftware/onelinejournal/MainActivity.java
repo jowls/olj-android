@@ -39,7 +39,7 @@ public class MainActivity extends ActionBarActivity
     public static SharedPreferences sharedPreferences;
     public static SqlOpenHelper helper;
     public static SQLiteDatabase database;
-    SharedPreferences.Editor editor;
+    public static SharedPreferences.Editor editor;
     View global_view;
 
     /**
@@ -73,6 +73,27 @@ public class MainActivity extends ActionBarActivity
         //db
         helper = new SqlOpenHelper(this);
         database = helper.getWritableDatabase();
+    }
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+
+        // Save UI state changes to the savedInstanceState.
+        // This bundle will be passed to onCreate if the process is
+        // killed and restarted.
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putString("mTitle", mTitle.toString());
+
+        // etc.
+
+    }
+    //onRestoreInstanceState
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        // Restore UI state from the savedInstanceState.
+        // This bundle has also been passed to onCreate.
+        mTitle = savedInstanceState.getString("mTitle");
     }
 
     public void onDateChanged(int year, int month, int day) {

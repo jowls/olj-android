@@ -154,7 +154,7 @@ public class JournalFragment extends Fragment {
                     JSONObject jsonPost = new JSONObject();
                     jsonPost.put("at", token);
 
-                    String urlPost = "http://oljtrial.cloudapp.net/api/v1/mobiles/alldays";
+                    String urlPost = getString(R.string.alldays);
 
                     HttpPost httppost = new HttpPost(urlPost);
                     StringEntity se = new StringEntity(jsonPost.toString());

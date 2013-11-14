@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  * Created by j on 11/11/13.
  */
 public class SqlOpenHelper extends SQLiteOpenHelper {
-    public static final String DBNAME = "tasksdb.sqlite";
+    public static final String DBNAME = "oljdb.sqlite";
     public static final int VERSION =1;
     public static final String TABLE_NAME = "days";
     public static final String ID= "id";
@@ -28,7 +28,7 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
                 ID + " integer primary key autoincrement not null, " +
                 DATE + " date unique not null, " +
                 CONTENT + " content not null, " +
-                UPDATED_AT + " datetime not null"
+                UPDATED_AT + " datetime"
                 + ");"
         );
     }

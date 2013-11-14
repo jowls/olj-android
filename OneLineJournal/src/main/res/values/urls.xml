@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alldays">http://oljtrial.cloudapp.net/api/v1/mobiles/alldays</string>
+    <string name="tokens_login">http://oljtrial.cloudapp.net/api/v1/tokens.json</string>
+    <string name="addday">http://oljtrial.cloudapp.net/api/v1/mobiles/addday</string>
+</resources>

@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -40,6 +41,8 @@ public class MainActivity extends ActionBarActivity
     public static SqlOpenHelper helper;
     public static SQLiteDatabase database;
     public static SharedPreferences.Editor editor;
+    public static String date = "(Choose date) -->";
+    public static String content = "";
     View global_view;
 
     /**
@@ -63,8 +66,17 @@ public class MainActivity extends ActionBarActivity
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         //mTitle = getTitle();
         mTitle = "Add Day";
-
-
+//        mFragmentManager = getSupportFragmentManager();
+//        FragmentAddDay fragment = (FragmentAddDay)mFragmentManager.findFragmentById(R.id.container);
+//        // This may give ClassCastExceptions in case there are fragments of
+//        // different types added to the container, so in that case use the
+//        // findFragmentByTag method
+//
+//        if (fragment == null) {
+//            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+//            fragmentTransaction.add(R.id.container, new FragmentAddDay());
+//            fragmentTransaction.commit();
+//        }
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
@@ -80,9 +92,8 @@ public class MainActivity extends ActionBarActivity
         // Save UI state changes to the savedInstanceState.
         // This bundle will be passed to onCreate if the process is
         // killed and restarted.
-        super.onSaveInstanceState(savedInstanceState);
-
         savedInstanceState.putString("mTitle", mTitle.toString());
+        super.onSaveInstanceState(savedInstanceState);
 
         // etc.
 
@@ -126,11 +137,12 @@ public class MainActivity extends ActionBarActivity
             fragmentManager.beginTransaction().replace(R.id.container, jf).commit();
             //jf.PopulateJournal();
         }
-        else
+        else if (position == 2)
         {
-        fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
-                .commit();
+            mTitle = "About";
+            AboutFragment af = new AboutFragment();
+            fragmentManager.beginTransaction().replace(R.id.container, af).commit();
+            //jf.PopulateJournal();
         }
     }
 

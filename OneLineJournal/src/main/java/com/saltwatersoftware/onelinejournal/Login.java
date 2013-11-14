@@ -84,7 +84,7 @@ public class Login extends Activity {
 
 
             //        String url = "http://www.site.com/login.json?session[email]=" + email + "?session[password]=" + password;
-            String urlPost = "http://oljtrial.cloudapp.net/api/v1/tokens.json";
+            String urlPost = getString(R.string.tokens_login);
 
     //        HttpGet httpget = new HttpGet(url);
             try

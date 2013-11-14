@@ -4,7 +4,7 @@
     <string name="app_name">OneLineJournal</string>
     <string name="title_section1">Add Day</string>
     <string name="title_section2">Journal</string>
-    <string name="title_section3">Section 3</string>
+    <string name="title_section3">About</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Log Out</string>
@@ -15,5 +15,14 @@
     <string name="btn_sign_up">Sign Up</string>
     <string name="login_title">Login to One Line Journal</string>
     <string name="addday_date">Date:</string><string name="addday_day">Day:</string><string name="addday_pick_date">Change date</string><string name="addday_save">Save Day</string>
+    <string name="addday_success">Thanks! Your day has been created.</string>
+    <string name="addday_success_title">Success</string>
+    <string name="addday_error">Unspecified error.</string>
+    <string name="addday_error_title">Error</string>
+    <string name="addday_unauth">Unauthorized. Please try to log out and back in.</string>
+    <string name="addday_unprocess">Day could not be processed. Duplicate Date?</string>
+    <string name="about_url">www.onelinejournal.org</string>
+    <string name="about_twitter">\@1linejournal</string>
+    <string name="about_email">admin@onelinejournal.org</string>
 
 </resources>

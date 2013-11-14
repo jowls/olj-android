@@ -1,53 +1,40 @@
 package com.saltwatersoftware.onelinejournal;
 
-import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
-import android.app.Dialog;
-import android.content.Intent;
+import android.content.ContentValues;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
-import java.util.List;
 
 /**
  * Created by j on 03/11/13.
  */
 public class FragmentAddDay extends Fragment implements View.OnClickListener {
-    TextView editText2;
     private DatePickerDialog.OnDateSetListener dateListener;
     public TextView mDate;
     public EditText mContent;
@@ -60,12 +47,31 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_add_day, container, false);
         btn = (Button) view.findViewById(R.id.button2);
         btn.setOnClickListener(this);
-//        if (savedInstanceState.getString("date") != null)
-//        {
-//            editText2.setText(savedInstanceState.getString("date"));
-//        }
+        if (savedInstanceState != null) {
+            String savedText = savedInstanceState.getString("date");
+            String savedContent = savedInstanceState.getString("content");
+            //mDate =   (TextView) this.getView().findViewById(R.id.textView);
+            //View vw = getView();
+            mDate = (TextView) view.findViewById(R.id.textView);
+            mDate.setText(savedText);
+            MainActivity.date = savedText;
+
+            mContent = (EditText) view.findViewById(R.id.editText);
+            mContent.setText(savedContent);
+            MainActivity.content = savedContent;
+        }else
+        {
+            if (mDate == null || mContent == null)
+            {
+                mDate = (TextView) view.findViewById(R.id.textView);
+                mDate.setText(MainActivity.date);
+                mContent = (EditText) view.findViewById(R.id.editText);
+                mContent.setText(MainActivity.content);
+            }
+        }
         return view;
     }
+
 
 //    @Override
 //    public void onSaveInstanceState(Bundle savedInstanceState) {
@@ -74,20 +80,35 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
 //        // This bundle will be passed to onCreate if the process is
 //        // killed and restarted.
 //
-//        savedInstanceState.putString("date", editText2.toString());
+//        savedInstanceState.putString("date", textView.toString());
 //        super.onSaveInstanceState(savedInstanceState);
 //
 //        // etc.
 //
 //    }
+//    @Override
+//    public void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//    // Read values from the "savedInstanceState"-object and put them in your textview
+//    }
+//
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        // Save the values you need from your textview into "outState"-object
+        mDate =   (TextView) this.getView().findViewById(R.id.textView);
+        outState.putString("date", mDate.getText().toString());
+        outState.putString("content", mContent.getText().toString());
+        //super.onSaveInstanceState(outState);
+    }
     @Override
     public void onClick(View v) {
         new AddDayTask().execute();
     }
     public void updateDate(int year, int month, int day) {
-        editText2 =   (TextView) this.getView().findViewById(R.id.textView);
+        mDate =   (TextView) this.getView().findViewById(R.id.textView);
+        month = month + 1;
         String date = year + "-" + month + "-" + day;
-        editText2.setText(date);
+        mDate.setText(date);
     }
 
     public class AddDayTask extends AsyncTask<Void, Void, String> {
@@ -114,7 +135,7 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
                 jsonPost.put("at", token);
                 jsonPost.put("day", jsonDay);
 
-                String urlPost = "http://oljtrial.cloudapp.net/api/v1/mobiles/addday";
+                String urlPost = getString(R.string.addday);
 
                 HttpPost httppost = new HttpPost(urlPost);
                 StringEntity se = new StringEntity(jsonPost.toString());
@@ -122,14 +143,29 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
                 httppost.setHeader("Accept", "application/json");
                 httppost.setHeader("Content-type", "application/json");
                 HttpResponse response = httpclient.execute(httppost);
-
-                responseAsText = EntityUtils.toString(response.getEntity());
+                StatusLine statusLine = response.getStatusLine();
+                int code = statusLine.getStatusCode();
+                if (code == 200)
+                {
+                    responseAsText = EntityUtils.toString(response.getEntity());
+                }
+                else if (code == 401)
+                {
+                    responseAsText = "Unauth";
+                }
+                else if (code == 422)
+                {
+                    responseAsText = "Unprocess";
+                }
+                else                {
+                    responseAsText = "Error";
+                }
 
             } catch (ClientProtocolException e) {
-                responseAsText = "Client protocol exception";
+                responseAsText = "Error";
 
             } catch (IOException e) {
-                responseAsText = "IO Exception";
+                responseAsText = "Error";
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -139,20 +175,42 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
         protected void onPostExecute(String responseAsText) {
             //mEditEmail.setText(responseAsText); works ok but was too large.
             Log.w("salt", responseAsText);
-//            try {
-//                JSONObject jObject = new JSONObject(responseAsText);
-//                String token = jObject.getString("token");
-//                if (token != null)
-//                {
-//                    editor.putString("token", token);
-//                    editor.commit();
-//                    Intent myIntent=new Intent(global_view.getContext(),MainActivity.class);
-//                    startActivity(myIntent);
-//                    finish();
-//                }
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
+            if (responseAsText == "Error")
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(getString(R.string.addday_error)).setTitle(getString(R.string.addday_error_title));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+
+            }
+            else if (responseAsText == "Unauth")
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(getString(R.string.addday_unauth)).setTitle(getString(R.string.addday_error_title));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+            else if (responseAsText == "Unprocess")
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(getString(R.string.addday_unprocess)).setTitle(getString(R.string.addday_error_title));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+            else
+            {
+                ContentValues values = new ContentValues();
+                values.put("date", mDate.getText().toString());
+                values.put("content", mContent.getText().toString());
+                Long id = MainActivity.database.insert("days", null, values);
+                Log.w("Successfully created row in days table with id: ", id.toString());
+                mDate.setText("(Choose date) -->");
+                mContent.setText("");
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(getString(R.string.addday_success)).setTitle(getString(R.string.addday_success_title));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
         }
     }
 }

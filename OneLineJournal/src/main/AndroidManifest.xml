@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.saltwatersoftware.onelinejournal"
     android:versionCode="1"
-    android:versionName="1.0" >
+    android:versionName="1.0">
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -14,7 +14,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppCompat" >
+        android:theme="@style/AppCompat"
+        android:debuggable="false">
         <activity
             android:name="com.saltwatersoftware.onelinejournal.Login"
             android:label="@string/app_name" >
@@ -34,5 +35,4 @@
             </intent-filter>
         </activity>
     </application>
-
 </manifest>

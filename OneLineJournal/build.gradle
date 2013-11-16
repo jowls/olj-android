@@ -20,6 +20,14 @@ android {
         minSdkVersion 7
         targetSdkVersion 19
     }
+    signingConfigs {
+        release {
+            storeFile file("~~~REMOVED~~~")
+            storePassword "~~~REMOVED~~~"
+            keyAlias "~~~REMOVED~~~"
+            keyPassword "~~~REMOVED~~~"
+        }
+    }
 }
 
 dependencies {

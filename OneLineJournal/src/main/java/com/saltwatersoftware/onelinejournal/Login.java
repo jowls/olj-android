@@ -97,29 +97,48 @@ public class Login extends Activity {
                 responseAsText = EntityUtils.toString(response.getEntity());
 
             } catch (ClientProtocolException e) {
-                responseAsText = "client protocol exception";
+                responseAsText = "Exception";
 
             } catch (IOException e) {
-                responseAsText = "io exception";
+                responseAsText = "Exception";
             }
             return responseAsText;
         }
         protected void onPostExecute(String responseAsText) {
             //mEditEmail.setText(responseAsText); works ok but was too large.
             Log.w("salt", responseAsText);
-            try {
-                JSONObject jObject = new JSONObject(responseAsText);
-                String token = jObject.getString("token");
-                if (token != null)
-                {
-                    editor.putString("token", token);
-                    editor.commit();
-                    Intent myIntent=new Intent(global_view.getContext(),MainActivity.class);
-                    startActivity(myIntent);
-                    finish();
+            if (responseAsText == "Exception")
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+                builder.setMessage("Sorry an error occurred. Please check login info and network connection.").setTitle(getString(R.string.addday_error_title));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }else
+            {
+                try {
+                    JSONObject jObject = new JSONObject(responseAsText);
+                    String token = jObject.optString("token", null);
+                    if (token != null)
+                    {
+                        editor.putString("token", token);
+                        editor.commit();
+                        Intent myIntent=new Intent(global_view.getContext(),MainActivity.class);
+                        startActivity(myIntent);
+                        finish();
+                    }else
+                    {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+                        builder.setMessage("Sorry an error occurred. Please check login info and network connection.").setTitle(getString(R.string.addday_error_title));
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+                    builder.setMessage(e.getMessage()).setTitle(getString(R.string.addday_error_title));
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
             }
         }
     }

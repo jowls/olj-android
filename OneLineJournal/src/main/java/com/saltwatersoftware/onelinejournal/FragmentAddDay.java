@@ -102,7 +102,10 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
     }
     @Override
     public void onClick(View v) {
+        Button button2 =   (Button) this.getView().findViewById(R.id.button2);
+        button2.setEnabled(false);
         new AddDayTask().execute();
+        button2.setEnabled(true);
     }
     public void updateDate(int year, int month, int day) {
         mDate =   (TextView) this.getView().findViewById(R.id.textView);
@@ -162,10 +165,10 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
                 }
 
             } catch (ClientProtocolException e) {
-                responseAsText = "Error";
+                responseAsText = "Client";
 
             } catch (IOException e) {
-                responseAsText = "Error";
+                responseAsText = "IO";
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -175,7 +178,7 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
         protected void onPostExecute(String responseAsText) {
             //mEditEmail.setText(responseAsText); works ok but was too large.
             Log.w("salt", responseAsText);
-            if (responseAsText == "Error")
+            if (responseAsText == "Error" || responseAsText == "Exception")
             {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(getString(R.string.addday_error)).setTitle(getString(R.string.addday_error_title));
@@ -190,10 +193,24 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
+            else if (responseAsText == "IO")
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage("Please check network connection. Offline support is planned but not yet available.").setTitle(getString(R.string.addday_error_title));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
             else if (responseAsText == "Unprocess")
             {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(getString(R.string.addday_unprocess)).setTitle(getString(R.string.addday_error_title));
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+            else if (responseAsText == "Client")
+            {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setMessage(getString(R.string.addday_client)).setTitle(getString(R.string.addday_error_title));
                 AlertDialog dialog = builder.create();
                 dialog.show();
             }
@@ -206,6 +223,8 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
                 Log.w("Successfully created row in days table with id: ", id.toString());
                 mDate.setText("(Choose date) -->");
                 mContent.setText("");
+                MainActivity.date = "(Choose date) -->";
+                MainActivity.content = "";
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 builder.setMessage(getString(R.string.addday_success)).setTitle(getString(R.string.addday_success_title));
                 AlertDialog dialog = builder.create();

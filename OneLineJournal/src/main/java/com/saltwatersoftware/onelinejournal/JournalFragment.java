@@ -139,7 +139,6 @@ public class JournalFragment extends Fragment {
 
         protected String doInBackground(Void... unused) {
 
-            //sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getView().getContext());
             HttpClient httpclient = new DefaultHttpClient();
 
             String token  = MainActivity.sharedPreferences.getString("token", "None");
@@ -148,7 +147,7 @@ public class JournalFragment extends Fragment {
             now.setToNow();
             Long nowMillis = now.toMillis(true);
             String responseAsText = "Exception";
-            if (dbUpdatedMillis < 0 || (nowMillis-dbUpdatedMillis > 7200000))
+            if ((dbUpdatedMillis < 0 || (nowMillis-dbUpdatedMillis > 7200000))&& isAdded()) //7200000
             {
                 try {
                     JSONObject jsonPost = new JSONObject();
@@ -181,7 +180,7 @@ public class JournalFragment extends Fragment {
             Log.w("salt", responseAsText);
             try {
                 JSONArray jsonJournal;
-                if (responseAsText != "Exception")
+                if (responseAsText != "Exception" && responseAsText != "Client protocol exception" && responseAsText != "IO Exception")
                 {
                     jsonJournal = new JSONArray(responseAsText);
 

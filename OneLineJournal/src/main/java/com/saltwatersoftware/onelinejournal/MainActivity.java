@@ -31,7 +31,25 @@ import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import org.apache.http.HttpVersion;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.HttpClient;
+import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.scheme.PlainSocketFactory;
+import org.apache.http.conn.scheme.Scheme;
+import org.apache.http.conn.scheme.SchemeRegistry;
+import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.params.BasicHttpParams;
+import org.apache.http.params.HttpConnectionParams;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpProtocolParams;
+import org.apache.http.protocol.HTTP;
+
 import java.io.File;
+import java.security.KeyStore;
 import java.util.Calendar;
 
 public class MainActivity extends ActionBarActivity
@@ -199,6 +217,11 @@ public class MainActivity extends ActionBarActivity
     public void LogOut(){
         //editor.putString("token", token);
         DestroyToken();
+        database.delete("days", null, null);
+        content = "";
+        date = "(Choose date) -->";
+        editor.putLong("db_updated", -1);
+        editor.apply();
         Intent myIntent=new Intent(MainActivity.this,Login.class);
         startActivity(myIntent);
         finish();

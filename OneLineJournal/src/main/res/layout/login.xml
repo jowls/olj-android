@@ -55,15 +55,15 @@
 
     <LinearLayout
         android:orientation="horizontal"
-        android:layout_width="fill_parent"
-        android:layout_height="@dimen/abc_action_bar_default_height">
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/abc_action_bar_default_height"
+        android:layout_gravity="center_horizontal">
 
         <Button
-            android:layout_width="fill_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/sign_in"
             android:id="@+id/button"
-            android:layout_gravity="center_horizontal"
             android:singleLine="false"
             android:clickable="true"
             android:onClick="signIn" />
@@ -76,6 +76,15 @@
         android:text="@string/btn_sign_up"
         android:id="@+id/button2"
         android:layout_gravity="center_horizontal"
-        android:clickable="true" />
+        android:clickable="true"
+        android:visibility="gone" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sign_up_note"
+        android:id="@+id/textView3"
+        android:autoLink="web"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

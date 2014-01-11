@@ -26,6 +26,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -205,11 +206,27 @@ public class DayEditFragment extends Fragment implements View.OnClickListener {
             }
             else
             {
-                ContentValues values = new ContentValues();
-                values.put("date", mDate.getText().toString());
-                values.put("content", mContent.getText().toString());
-                Long id = MainActivity.database.insert("days", null, values);
-                Log.w("Successfully created row in days table with id: ", id.toString());
+                //todo: finish this up
+                JSONArray jsonJournal;
+                try {
+                    JSONObject tempObj = new JSONObject(responseAsText);
+                    JSONObject tempDay = tempObj.getJSONObject("day");
+                    String content = tempDay.optString("content", "NULL");
+                    String date = tempDay.optString("date", "NULL");
+                    String updatedAt = tempDay.optString("updated_at", "NULL");
+                    Integer railsID = tempDay.optInt("id", -1);
+
+                    ContentValues values = new ContentValues();
+                    values.put("date", date);
+                    values.put("content", content);
+                    values.put("updated_at", updatedAt);
+                    values.put("rails_id", railsID);
+                    Integer num = MainActivity.database.update("days", values, "rails_id="+railsID.toString(), null);
+                    Log.w("Successfully updated row. # row(s) affected is : ", num.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
                 mDate.setText("(Choose date) -->");
                 mContent.setText("");
                 MainActivity.date = "(Choose date) -->";
@@ -219,6 +236,7 @@ public class DayEditFragment extends Fragment implements View.OnClickListener {
                 AlertDialog dialog = builder.create();
                 progress.dismiss();
                 dialog.show();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         }
     }

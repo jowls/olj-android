@@ -227,11 +227,24 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
             }
             else
             {
-                ContentValues values = new ContentValues();
-                values.put("date", mDate.getText().toString());
-                values.put("content", mContent.getText().toString());
-                Long id = MainActivity.database.insert("days", null, values);
-                Log.w("Successfully created row in days table with id: ", id.toString());
+                JSONObject tempObj = null;
+                try {
+                    tempObj = new JSONObject(responseAsText);
+                    JSONObject tempDay = tempObj.getJSONObject("day");
+                    String content = tempDay.optString("content", "NULL");
+                    String date = tempDay.optString("date", "NULL");
+                    String updatedAt = tempDay.optString("updated_at", "NULL");
+                    Integer railsID = tempDay.optInt("id", -1);
+                    ContentValues values = new ContentValues();
+                    values.put("date", date);
+                    values.put("content", content);
+                    values.put("updated_at", updatedAt);
+                    values.put("rails_id", railsID);
+                    Long id = MainActivity.database.insert("days", null, values);
+                    Log.w("Successfully created row in days table with id: ", id.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
                 mDate.setText("(Choose date) -->");
                 mContent.setText("");
                 MainActivity.date = "(Choose date) -->";

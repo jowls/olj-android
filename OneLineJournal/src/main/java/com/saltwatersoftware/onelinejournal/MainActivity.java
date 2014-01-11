@@ -305,6 +305,6 @@ public class MainActivity extends ActionBarActivity
     {
         FragmentManager fragmentManager = getSupportFragmentManager();
         day.setRetainInstance(true);
-        fragmentManager.beginTransaction().replace(R.id.container, day).commit();
+        fragmentManager.beginTransaction().replace(R.id.container, day).addToBackStack(null).commit();
     }
 }

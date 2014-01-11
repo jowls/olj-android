@@ -1,22 +1,21 @@
 package com.saltwatersoftware.onelinejournal;
 
+//import android.app.Fragment;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
@@ -33,94 +32,64 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 /**
- * Created by j on 03/11/13.
+ * Created by j on 30/11/13.
  */
-public class FragmentAddDay extends Fragment implements View.OnClickListener {
-    private DatePickerDialog.OnDateSetListener dateListener;
-    public TextView mDate;
-    public EditText mContent;
-    SharedPreferences sharedPreferences;
-    String transDateString;
-    Button btn;
+public class DayEditFragment extends Fragment implements View.OnClickListener {
     ProgressDialog progress;
+    SharedPreferences sharedPreferences;
+    public EditText mContent;
+    TextView mDate;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_add_day, container, false);
-        btn = (Button) view.findViewById(R.id.button2);
+        View view = inflater.inflate(R.layout.edit_day, container, false);
+        Button btn = (Button) view.findViewById(R.id.editSubmit);
         btn.setOnClickListener(this);
+        Bundle bundle = this.getArguments();
+        if (bundle != null)
+        {
+            String date = bundle.getString("date");
+            String content = bundle.getString("content");
+            mDate = (TextView) view.findViewById(R.id.dayValueLabel);
+            mDate.setText(date);
+            mContent = (EditText) view.findViewById(R.id.editText);
+            mContent.setText(content);
+        }
+        //setRetainInstance(true);
+
         if (savedInstanceState != null) {
             String savedText = savedInstanceState.getString("date");
             String savedContent = savedInstanceState.getString("content");
-            //mDate =   (TextView) this.getView().findViewById(R.id.textView);
-            //View vw = getView();
-            mDate = (TextView) view.findViewById(R.id.textView);
+
+            mDate = (TextView) view.findViewById(R.id.dayValueLabel);
             mDate.setText(savedText);
-            MainActivity.date = savedText;
 
             mContent = (EditText) view.findViewById(R.id.editText);
             mContent.setText(savedContent);
-            MainActivity.content = savedContent;
-        }else
-        {
-            if (mDate == null || mContent == null)
-            {
-                mDate = (TextView) view.findViewById(R.id.textView);
-                mDate.setText(MainActivity.date);
-                mContent = (EditText) view.findViewById(R.id.editText);
-                mContent.setText(MainActivity.content);
-            }
         }
+        //return inflater.inflate(R.layout.edit_day, container, false);
         return view;
     }
-
-
-//    @Override
-//    public void onSaveInstanceState(Bundle savedInstanceState) {
-//
-//        // Save UI state changes to the savedInstanceState.
-//        // This bundle will be passed to onCreate if the process is
-//        // killed and restarted.
-//
-//        savedInstanceState.putString("date", textView.toString());
-//        super.onSaveInstanceState(savedInstanceState);
-//
-//        // etc.
-//
-//    }
-//    @Override
-//    public void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//    // Read values from the "savedInstanceState"-object and put them in your textview
-//    }
-//
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        // Save the values you need from your textview into "outState"-object
-        mDate =   (TextView) this.getView().findViewById(R.id.textView);
+        super.onSaveInstanceState(outState);
         outState.putString("date", mDate.getText().toString());
         outState.putString("content", mContent.getText().toString());
-        //super.onSaveInstanceState(outState);
     }
+
     @Override
     public void onClick(View v) {
-        Button button2 =   (Button) this.getView().findViewById(R.id.button2);
+        Button button2 =   (Button) this.getView().findViewById(R.id.editSubmit);
         progress = new ProgressDialog(getActivity());
-        progress.setTitle("Adding Day");
+        progress.setTitle("Submitting changes");
         progress.setMessage("Please wait...");
         progress.setCancelable(false);
         progress.show();
-        new AddDayTask().execute();
+        new EditDayTask().execute();
         button2.setEnabled(true);
     }
-    public void updateDate(int year, int month, int day) {
-        mDate =   (TextView) this.getView().findViewById(R.id.textView);
-        month = month + 1;
-        String date = year + "-" + month + "-" + day;
-        mDate.setText(date);
-    }
 
-    public class AddDayTask extends AsyncTask<Void, Void, String> {
+    public class EditDayTask extends AsyncTask<Void, Void, String> {
 
         private Exception exception;
 
@@ -129,22 +98,31 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
             sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getView().getContext());
             HttpClient httpclient = new DefaultHttpClient();
             //get the parameters
-            mDate   = (TextView)getView().findViewById(R.id.textView);
             mContent = (EditText)getView().findViewById(R.id.editText);
-            String date = mDate.getText().toString();
+            mContent = (EditText)getView().findViewById(R.id.editText);
             String content = mContent.getText().toString();
+            String date = mDate.getText().toString();
             String token  = sharedPreferences.getString("token", "None");
+            Cursor c = MainActivity.database.query("days", null, "date=?", new String[]{date}, null, null, null);
+            int i = c.getColumnIndex("rails_id");
+            int j = c.getColumnIndex("updated_at");
+            c.moveToFirst();
+            int railsID = c.getInt(i);
+            String updatedAt = c.getString(j);
+
             String responseAsText = "Exception";
 
             try {
                 JSONObject jsonDay = new JSONObject();
                 jsonDay.put("date", date);
                 jsonDay.put("content", content);
+                jsonDay.put("rails_id", railsID);
+                jsonDay.put("updated_at", updatedAt);
                 JSONObject jsonPost = new JSONObject();
                 jsonPost.put("at", token);
                 jsonPost.put("day", jsonDay);
 
-                String urlPost = getString(R.string.addday);
+                String urlPost = getString(R.string.editday);
 
                 HttpPost httppost = new HttpPost(urlPost);
                 StringEntity se = new StringEntity(jsonPost.toString());

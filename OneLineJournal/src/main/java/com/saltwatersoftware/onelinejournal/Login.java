@@ -2,6 +2,7 @@ package com.saltwatersoftware.onelinejournal;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -41,6 +42,7 @@ public class Login extends Activity {
     View global_view;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
+    ProgressDialog progress;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +61,12 @@ public class Login extends Activity {
     public void signIn(View view)
     {
         global_view = view;
+        progress = new ProgressDialog(this);
+        progress.setTitle("Signing in");
+        progress.setMessage("Please wait...");
+        progress.setCancelable(false);
+        progress.show();
+// To dismiss the dialog
         new LoginTask().execute();
 
 //        httpget.setHeader("Accept", "application/json");
@@ -112,6 +120,7 @@ public class Login extends Activity {
                 AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
                 builder.setMessage("Sorry an error occurred. Please check login info and network connection.").setTitle(getString(R.string.addday_error_title));
                 AlertDialog dialog = builder.create();
+                progress.dismiss();
                 dialog.show();
             }else
             {
@@ -123,13 +132,21 @@ public class Login extends Activity {
                         editor.putString("token", token);
                         editor.commit();
                         Intent myIntent=new Intent(global_view.getContext(),MainActivity.class);
+                        
+                        try {
+                            progress.dismiss();
+                            progress = null;
+                        } catch (Exception e) {
+                            // nothing
+                        }
                         startActivity(myIntent);
                         finish();
                     }else
                     {
                         AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
-                        builder.setMessage("Sorry an error occurred. Please check login info and network connection.").setTitle(getString(R.string.addday_error_title));
+                        builder.setMessage(jObject.optString("message", null)).setTitle(getString(R.string.addday_error_title));
                         AlertDialog dialog = builder.create();
+                        progress.dismiss();
                         dialog.show();
                     }
                 } catch (JSONException e) {
@@ -137,6 +154,7 @@ public class Login extends Activity {
                     AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
                     builder.setMessage(e.getMessage()).setTitle(getString(R.string.addday_error_title));
                     AlertDialog dialog = builder.create();
+                    progress.dismiss();
                     dialog.show();
                 }
             }

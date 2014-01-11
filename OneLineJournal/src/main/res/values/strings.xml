@@ -25,6 +25,6 @@
     <string name="about_twitter">\@1linejournal</string>
     <string name="about_email">admin@onelinejournal.org</string>
     <string name="addday_client">Client Protocol Exception</string>
-    <string name="sign_up_note">Sign up for free at www.onelinejournal.org/users/sign_up</string>
+    <string name="sign_up_note">Sign up for free at www.onelinejournal.org/users/sign_up</string><string name="edit_day_label">Edit day:</string><string name="editDaySubmitButton">Submit Changes</string>
 
 </resources>

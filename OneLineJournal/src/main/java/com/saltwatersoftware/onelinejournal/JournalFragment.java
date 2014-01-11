@@ -1,8 +1,12 @@
 package com.saltwatersoftware.onelinejournal;
 
 //import android.app.Fragment;
+import android.app.ProgressDialog;
+import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -10,11 +14,13 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 //import android.support.v4.widget.SearchViewCompatIcs;
+import android.support.v4.app.FragmentManager;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -33,19 +39,45 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 
+
 /**
  * Created by j on 11/11/13.
  */
 public class JournalFragment extends Fragment {
     ListView listview;
-
+    ProgressDialog progress;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         //new PopulateJournalTask().execute();
         //sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getView().getContext());
+        progress = new ProgressDialog(getActivity());
+        progress.setTitle("Fetching journal");
+        progress.setMessage("Please wait...");
+        progress.setCancelable(false);
+        progress.show();
+        View view = inflater.inflate(R.layout.journal_fragment, container, false);
+        ListView jListView = (ListView) view.findViewById(R.id.jListView);
+        jListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> a, View v, int position, long id) {
+                TextView contentTextView = (TextView) v.findViewById(R.id.contentText);
+                TextView dateTextView = (TextView) v.findViewById(R.id.dateText);
+                String contentText = contentTextView.getText().toString().trim();
+                String dateText = dateTextView.getText().toString().trim();
+                DayEditFragment dayEditFragment = new DayEditFragment();
+                Bundle bundle = new Bundle();
+                bundle.putString("date", dateText);
+                bundle.putString("content", contentText);
+                dayEditFragment.setArguments(bundle);
+                MainActivity activity = (MainActivity) getActivity();
+                activity.editDay(dayEditFragment);
+                //activity.onNavigationDrawerItemSelected(3);
+                //MainActivity.fragmentManager.beginTransaction().replace(R.id.container, dayEditFragment).commit();
+            }
+        });
         new PopulateJournalTask().execute();
-        return inflater.inflate(R.layout.journal_fragment, container, false);
-
+        //return inflater.inflate(R.layout.journal_fragment, container, false);
+        return view;
     }
 
     public void PopulateJournal()
@@ -147,6 +179,7 @@ public class JournalFragment extends Fragment {
             now.setToNow();
             Long nowMillis = now.toMillis(true);
             String responseAsText = "Exception";
+
             if ((dbUpdatedMillis < 0 || (nowMillis-dbUpdatedMillis > 7200000))&& isAdded()) //7200000
             {
                 try {
@@ -190,10 +223,14 @@ public class JournalFragment extends Fragment {
                         JSONObject tempDay = tempObj.getJSONObject("day");
                         String content = tempDay.optString("content", "NULL");
                         String date = tempDay.optString("date", "NULL");
+                        String updatedAt = tempDay.optString("updated_at", "NULL");
+                        Integer railsID = tempDay.optInt("id", -1);
+
                         ContentValues values = new ContentValues();
                         values.put("date", date);
                         values.put("content", content);
-                        values.put("updated_at", content);
+                        values.put("updated_at", updatedAt);
+                        values.put("rails_id", railsID);
 //                    todo: handle android.database.sqlite.SQLiteConstraintException: column date is not unique (code 19)
                         Long id = MainActivity.database.insert("days", null, values);
                         Log.w("Successfully created row in days table with id: ", id.toString());
@@ -201,10 +238,12 @@ public class JournalFragment extends Fragment {
                         now.setToNow();
                         MainActivity.editor.putLong("db_updated", now.toMillis(true));
                         MainActivity.editor.apply();
+                        progress.dismiss();
                     }
                 }else
                 {
                     jsonJournal = null;
+                    progress.dismiss();
                 }
                 View vw = getView();
                 if (vw != null)
@@ -217,6 +256,7 @@ public class JournalFragment extends Fragment {
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
+                progress.dismiss();
             }
         }
     }

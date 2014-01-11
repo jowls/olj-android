@@ -9,12 +9,13 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SqlOpenHelper extends SQLiteOpenHelper {
     public static final String DBNAME = "oljdb.sqlite";
-    public static final int VERSION =1;
+    public static final int VERSION =2; //bumped to 2 for release 1.02
     public static final String TABLE_NAME = "days";
     public static final String ID= "id";
     public static final String DATE="date";
     public static final String CONTENT="content";
     public static final String UPDATED_AT="updated_at";
+    public static final String RAILS_ID="rails_id";
 
     public SqlOpenHelper(Context context) {
         super(context, DBNAME, null, VERSION);
@@ -27,13 +28,17 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
         db.execSQL("create table " + TABLE_NAME + "(" +
                 ID + " integer primary key autoincrement not null, " +
                 DATE + " date unique not null, " +
-                CONTENT + " content not null, " +
-                UPDATED_AT + " datetime"
+                CONTENT + " text not null, " +
+                UPDATED_AT + " datetime, " +
+                RAILS_ID + " integer not null"
                 + ");"
         );
     }
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2)
     {
+        arg0.execSQL("alter table " + TABLE_NAME +
+                " add column " + RAILS_ID + " integer not null;"
+        );
     }
 }

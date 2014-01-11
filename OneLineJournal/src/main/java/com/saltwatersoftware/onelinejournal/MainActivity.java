@@ -3,6 +3,7 @@ package com.saltwatersoftware.onelinejournal;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -61,6 +62,9 @@ public class MainActivity extends ActionBarActivity
     public static SharedPreferences.Editor editor;
     public static String date = "(Choose date) -->";
     public static String content = "";
+    public static ProgressDialog jprogress;
+    public static FragmentManager fragmentManager;
+
     View global_view;
 
     /**
@@ -76,6 +80,7 @@ public class MainActivity extends ActionBarActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        fragmentManager = getSupportFragmentManager();
         setContentView(R.layout.activity_main);
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         editor = sharedPreferences.edit();
@@ -161,6 +166,12 @@ public class MainActivity extends ActionBarActivity
             AboutFragment af = new AboutFragment();
             fragmentManager.beginTransaction().replace(R.id.container, af).commit();
             //jf.PopulateJournal();
+        }
+        else if (position == 3)
+        {
+            mTitle = "Edit Day";
+            DayEditFragment def = new DayEditFragment();
+            fragmentManager.beginTransaction().replace(R.id.container, def).commit();
         }
     }
 
@@ -282,5 +293,18 @@ public class MainActivity extends ActionBarActivity
     private static boolean doesDatabaseExist(ContextWrapper context, String dbName) {
         File dbFile=context.getDatabasePath(dbName);
         return dbFile.exists();
+    }
+    public void showJProgress()
+    {
+        jprogress = new ProgressDialog(this);
+        jprogress.setTitle("Fetching journal");
+        jprogress.setMessage("Please wait...");
+        jprogress.show();
+    }
+    public void editDay(DayEditFragment day)
+    {
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        day.setRetainInstance(true);
+        fragmentManager.beginTransaction().replace(R.id.container, day).commit();
     }
 }

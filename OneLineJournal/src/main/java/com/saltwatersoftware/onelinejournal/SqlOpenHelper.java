@@ -9,7 +9,7 @@ import android.database.sqlite.SQLiteOpenHelper;
  */
 public class SqlOpenHelper extends SQLiteOpenHelper {
     public static final String DBNAME = "oljdb.sqlite";
-    public static final int VERSION =2; //bumped to 2 for release 1.02
+    public static final int VERSION =3; //bumped to 2 for release 1.02
     public static final String TABLE_NAME = "days";
     public static final String ID= "id";
     public static final String DATE="date";
@@ -22,6 +22,7 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
 
     }
     public void onCreate(SQLiteDatabase db) {
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         createDatabase(db);
     }
     private void createDatabase(SQLiteDatabase db) {
@@ -37,8 +38,11 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2)
     {
-        arg0.execSQL("alter table " + TABLE_NAME +
+/*        arg0.execSQL("alter table " + TABLE_NAME +
                 " add column " + RAILS_ID + " integer not null;"
-        );
+        );*/
+        MainActivity.editor.putLong("db_updated", -1);
+        MainActivity.editor.apply();
+        onCreate(arg0);
     }
 }

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.saltwatersoftware.onelinejournal"
-    android:versionCode="2"
-    android:versionName="1.01">
+    android:versionCode="4"
+    android:versionName="1.03">
 
     <uses-sdk
         android:minSdkVersion="9"
@@ -15,7 +15,7 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppCompat"
-        android:debuggable="true">
+        android:debuggable="false">
         <activity
             android:name="com.saltwatersoftware.onelinejournal.Login"
             android:label="@string/app_name" >
@@ -30,7 +30,6 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>

@@ -38,6 +38,8 @@ public class SqlOpenHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2)
     {
+        //Be extra careful with this in the future. Adding a not null column on an existing table is trouble, need to specify default value.
+        //OR add column and then make it null? However that could be bad for data consistency.
 /*        arg0.execSQL("alter table " + TABLE_NAME +
                 " add column " + RAILS_ID + " integer not null;"
         );*/

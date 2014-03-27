@@ -73,8 +73,6 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
         }
         return view;
     }
-
-
 //    @Override
 //    public void onSaveInstanceState(Bundle savedInstanceState) {
 //
@@ -93,7 +91,6 @@ public class FragmentAddDay extends Fragment implements View.OnClickListener {
 //        super.onRestoreInstanceState(savedInstanceState);
 //    // Read values from the "savedInstanceState"-object and put them in your textview
 //    }
-//
     @Override
     public void onSaveInstanceState(Bundle outState) {
         // Save the values you need from your textview into "outState"-object

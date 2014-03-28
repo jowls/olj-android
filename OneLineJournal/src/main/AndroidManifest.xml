@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <permission android:name="com.saltwatersoftware.onelinejournal.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
@@ -19,13 +20,14 @@
 
 
     <application
+        android:name="com.saltwatersoftware.onelinejournal.GcmController"
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppCompat">
         <!--android:debuggable="false">-->
         <activity
-            android:name="com.saltwatersoftware.onelinejournal.Login"
+            android:name=".LoginActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,6 +51,13 @@
                 <category android:name="com.example.gcm" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".BootReceiver"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <service android:name=".GcmIntentService" />
+        <service android:name=".BootIntentService" />
     </application>
 </manifest>

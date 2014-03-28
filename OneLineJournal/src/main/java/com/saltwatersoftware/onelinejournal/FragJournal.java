@@ -2,19 +2,13 @@ package com.saltwatersoftware.onelinejournal;
 
 //import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.ContentUris;
 import android.content.ContentValues;
-import android.content.Intent;
 import android.database.Cursor;
-import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 //import android.support.v4.widget.SearchViewCompatIcs;
-import android.support.v4.app.FragmentManager;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -22,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -43,7 +36,7 @@ import java.io.IOException;
 /**
  * Created by j on 11/11/13.
  */
-public class JournalFragment extends Fragment {
+public class FragJournal extends Fragment {
     ListView listview;
     ProgressDialog progress;
     @Override
@@ -64,15 +57,15 @@ public class JournalFragment extends Fragment {
                 TextView dateTextView = (TextView) v.findViewById(R.id.dateText);
                 String contentText = contentTextView.getText().toString().trim();
                 String dateText = dateTextView.getText().toString().trim();
-                DayEditFragment dayEditFragment = new DayEditFragment();
+                FragDayEdit fragDayEdit = new FragDayEdit();
                 Bundle bundle = new Bundle();
                 bundle.putString("date", dateText);
                 bundle.putString("content", contentText);
-                dayEditFragment.setArguments(bundle);
+                fragDayEdit.setArguments(bundle);
                 MainActivity activity = (MainActivity) getActivity();
-                activity.editDay(dayEditFragment);
+                activity.editDay(fragDayEdit);
                 //activity.onNavigationDrawerItemSelected(3);
-                //MainActivity.fragmentManager.beginTransaction().replace(R.id.container, dayEditFragment).commit();
+                //MainActivity.fragmentManager.beginTransaction().replace(R.id.container, fragDayEdit).commit();
             }
         });
         new PopulateJournalTask().execute();

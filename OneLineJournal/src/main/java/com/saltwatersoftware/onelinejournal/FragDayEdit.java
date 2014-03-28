@@ -35,7 +35,7 @@ import java.io.IOException;
 /**
  * Created by j on 30/11/13.
  */
-public class DayEditFragment extends Fragment implements View.OnClickListener {
+public class FragDayEdit extends Fragment implements View.OnClickListener {
     ProgressDialog progress;
     SharedPreferences sharedPreferences;
     public EditText mContent;

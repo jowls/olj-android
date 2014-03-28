@@ -35,7 +35,7 @@ import java.io.IOException;
 /**
  * Created by j on 03/11/13.
  */
-public class FragmentAddDay extends Fragment implements View.OnClickListener {
+public class FragAddDay extends Fragment implements View.OnClickListener {
     private DatePickerDialog.OnDateSetListener dateListener;
     public TextView mDate;
     public EditText mContent;

@@ -1,80 +1,33 @@
 package com.saltwatersoftware.onelinejournal;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpVersion;
-import org.apache.http.StatusLine;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.ClientConnectionManager;
-import org.apache.http.conn.scheme.PlainSocketFactory;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.scheme.SchemeRegistry;
-import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.params.BasicHttpParams;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.params.HttpParams;
-import org.apache.http.params.HttpProtocolParams;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.util.Calendar;
-import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainActivity extends ActionBarActivity
-        implements NavigationDrawerFragment.NavigationDrawerCallbacks, DatePickerFragment.OnDateSelectedListener {
+        implements NavigationDrawerFragment.NavigationDrawerCallbacks, FragDatePicker.OnDateSelectedListener {
     EditText editText2;
     public static SharedPreferences sharedPreferences;
     public static SqlOpenHelper helper;
@@ -85,19 +38,8 @@ public class MainActivity extends ActionBarActivity
     public static ProgressDialog jprogress;
     public static FragmentManager fragmentManager;
 
-    //GCM Stuff
-    public static final String EXTRA_MESSAGE = "message";
-    public static final String PROPERTY_REG_ID = "regid";
-    private static final String PROPERTY_APP_VERSION = "app_version";
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
-    String SENDER_ID = "~~~REMOVED~~~"; //Dev SENDER_ID
-    GoogleCloudMessaging gcm;
     Context context;
-    String regid;
-    private  final int MAX_ATTEMPTS = 10;
-    private  final int BACKOFF_MILLI_SECONDS = 2000;
-    private  final Random random = new Random();
-    private String TAG  = "MainActivity";
+    private GcmController gcmc;
 
     View global_view;
 
@@ -123,50 +65,23 @@ public class MainActivity extends ActionBarActivity
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
         //mTitle = getTitle();
         mTitle = "Add Day";
-//        mFragmentManager = getSupportFragmentManager();
-//        FragmentAddDay fragment = (FragmentAddDay)mFragmentManager.findFragmentById(R.id.container);
-//        // This may give ClassCastExceptions in case there are fragments of
-//        // different types added to the container, so in that case use the
-//        // findFragmentByTag method
-//
-//        if (fragment == null) {
-//            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-//            fragmentTransaction.add(R.id.container, new FragmentAddDay());
-//            fragmentTransaction.commit();
-//        }
         // Set up the drawer.
         mNavigationDrawerFragment.setUp(
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
-        //db
+        //DB
         helper = new SqlOpenHelper(this);
         database = helper.getWritableDatabase();
-
-        // Check device for Play Services APK. If check succeeds, proceed with
-        //  GCM registration.
-        final SharedPreferences prefs = sharedPreferences;
-        SharedPreferences.Editor editor = prefs.edit();
-        //Remove the next two lines before deployment
-        editor.putString("regid", "");
-        editor.commit();
-        context = getApplicationContext();
-        if (checkPlayServices()) {
-            gcm = GoogleCloudMessaging.getInstance(this);
-            regid = getRegistrationId(context);
-
-            if (regid.isEmpty()) {
-                registerInBackground();
-            }
-        } else {
-            Log.i(TAG, "No valid Google Play Services APK found.");
-        }
+        //GCM
+        gcmc = (GcmController) getApplicationContext();
+        gcmc.onCreateRegIdTasks(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        checkPlayServices();
+        gcmc.onResumeRegIdTasks(this);
     }
 
     @Override
@@ -193,7 +108,7 @@ public class MainActivity extends ActionBarActivity
     public void onDateChanged(int year, int month, int day) {
         // The user selected the headline of an article from the HeadlinesFragment
         // Do something here to display that article
-        FragmentAddDay dpFrag = (FragmentAddDay)
+        FragAddDay dpFrag = (FragAddDay)
                 getSupportFragmentManager().findFragmentById(R.id.container);
 
         if (dpFrag != null) {
@@ -211,26 +126,26 @@ public class MainActivity extends ActionBarActivity
         if (position == 0)
         {
             mTitle = "Add Day";
-            fragmentManager.beginTransaction().replace(R.id.container, new FragmentAddDay()).commit();
+            fragmentManager.beginTransaction().replace(R.id.container, new FragAddDay()).commit();
         }
         else if (position == 1)
         {
             mTitle = "Journal";
-            JournalFragment jf = new JournalFragment();
+            FragJournal jf = new FragJournal();
             fragmentManager.beginTransaction().replace(R.id.container, jf).commit();
             //jf.PopulateJournal();
         }
         else if (position == 2)
         {
             mTitle = "About";
-            AboutFragment af = new AboutFragment();
+            FragAbout af = new FragAbout();
             fragmentManager.beginTransaction().replace(R.id.container, af).commit();
             //jf.PopulateJournal();
         }
         else if (position == 3)
         {
             mTitle = "Edit Day";
-            DayEditFragment def = new DayEditFragment();
+            FragDayEdit def = new FragDayEdit();
             fragmentManager.beginTransaction().replace(R.id.container, def).commit();
         }
     }
@@ -280,8 +195,8 @@ public class MainActivity extends ActionBarActivity
                 LogOut();
                 return true;
 
-            case R.id.action_settings:
-                return true;
+            //case R.id.action_settings:
+                //return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -293,7 +208,7 @@ public class MainActivity extends ActionBarActivity
         date = "(Choose date) -->";
         editor.putLong("db_updated", -1);
         editor.apply();
-        Intent myIntent=new Intent(MainActivity.this,Login.class);
+        Intent myIntent=new Intent(MainActivity.this,LoginActivity.class);
         startActivity(myIntent);
         finish();
     }
@@ -346,7 +261,7 @@ public class MainActivity extends ActionBarActivity
     }
 
     public void showDatePickerDialog(View v) {
-        DialogFragment newFragment = new DatePickerFragment();
+        DialogFragment newFragment = new FragDatePicker();
         newFragment.show(getSupportFragmentManager(), "datePicker");
     }
 
@@ -361,219 +276,10 @@ public class MainActivity extends ActionBarActivity
         jprogress.setMessage("Please wait...");
         jprogress.show();
     }
-    public void editDay(DayEditFragment day)
+    public void editDay(FragDayEdit day)
     {
         FragmentManager fragmentManager = getSupportFragmentManager();
         day.setRetainInstance(true);
         fragmentManager.beginTransaction().replace(R.id.container, day).addToBackStack(null).commit();
-    }
-
-    /**
-     * Check the device to make sure it has the Google Play Services APK. If
-     * it doesn't, display a dialog that allows users to download the APK from
-     * the Google Play Store or enable it in the device's system settings.
-     */
-    private boolean checkPlayServices() {
-        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (resultCode != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
-                GooglePlayServicesUtil.getErrorDialog(resultCode, this,
-                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
-            } else {
-                Log.w("salt", "This device is not supported.");
-                finish();
-            }
-            return false;
-        }
-        return true;
-    }
-    /**
-     * Gets the current registration ID for application on GCM service.
-     * <p>
-     * If result is empty, the app needs to register.
-     *
-     * @return registration ID, or empty string if there is no existing
-     *         registration ID.
-     */
-    private String getRegistrationId(Context context) {
-        final SharedPreferences prefs = sharedPreferences;
-        String registrationId = prefs.getString(PROPERTY_REG_ID, "");
-        if (registrationId.isEmpty()) {
-            Log.i(TAG, "Registration not found.");
-            return "";
-        }
-        // Check if app was updated; if so, it must clear the registration ID
-        // since the existing regID is not guaranteed to work with the new
-        // app version.
-        int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
-        int currentVersion = getAppVersion(context);
-        if (registeredVersion != currentVersion) {
-            Log.i(TAG, "App version changed.");
-            return "";
-        }
-        return registrationId;
-    }
-    /**
-     * @return Application's version code from the {@code PackageManager}.
-     */
-    private static int getAppVersion(Context context) {
-        try {
-            PackageInfo packageInfo = context.getPackageManager()
-                    .getPackageInfo(context.getPackageName(), 0);
-            return packageInfo.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            // should never happen
-            throw new RuntimeException("Could not get package name: " + e);
-        }
-    }
-    /**
-     * Registers the application with GCM servers asynchronously.
-     * <p>
-     * Stores the registration ID and app versionCode in the application's
-     * shared preferences.
-     */
-    public void registerInBackground() {
-        new AsyncTask<Void, Void, String>() {
-            @Override
-            protected String doInBackground(Void... params) {
-                String msg = "";
-                try {
-                    if (gcm == null) {
-                        gcm = GoogleCloudMessaging.getInstance(context);
-                    }
-                    regid = gcm.register(SENDER_ID);
-                    msg = "Device registered, registration ID=" + regid;
-                    // You should send the registration ID to your server over HTTP,
-                    // so it can use GCM/HTTP or CCS to send messages to your app.
-                    // The request to your server should be authenticated if your app
-                    // is using accounts.
-                    boolean didItSend = sendRegistrationIdToBackend();
-                    if (didItSend == false) {
-                        long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
-                        for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-
-                            Log.d(TAG, "Attempt #" + i + " to register");
-                            didItSend = sendRegistrationIdToBackend();
-                            if (didItSend == true) {
-                                break;
-                            }
-                            if (i == MAX_ATTEMPTS) {
-                                break;
-                            }
-                            try {
-                                Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
-                                Thread.sleep(backoff);
-                            } catch (InterruptedException e1) {
-                                // Activity finished before we complete - exit.
-                                Log.d(TAG, "Thread interrupted: abort remaining retries!");
-                                Thread.currentThread().interrupt();
-                            }
-                            backoff *= 2;
-                        }
-                    }
-                    // Persist the regID - no need to register again.
-                    storeRegistrationId(context, regid);
-                } catch (IOException ex) {
-                    msg = "Error :" + ex.getMessage();
-                    long backoff = BACKOFF_MILLI_SECONDS + random.nextInt(1000);
-
-                    for (int i = 1; i <= MAX_ATTEMPTS; i++) {
-
-                        Log.d(TAG, "Attempt #" + i + " to register");
-
-                        try {
-                            if (gcm == null) {
-                                gcm = GoogleCloudMessaging.getInstance(context);
-                            }
-                            regid = gcm.register(SENDER_ID);
-                            msg = "Device registered, registration ID=" + regid;
-                        } catch (IOException e) {
-                            // Here we are simplifying and retrying on any error; in a real
-                            // application, it should retry only on unrecoverable errors
-                            // (like HTTP error code 503).
-                            Log.e(TAG, "Failed to register on attempt " + i + ":" + e);
-                            if (i == MAX_ATTEMPTS) {
-                                break;
-                            }
-                            try {
-                                Log.d(TAG, "Sleeping for " + backoff + " ms before retry");
-                                Thread.sleep(backoff);
-                            } catch (InterruptedException e1) {
-                                // Activity finished before we complete - exit.
-                                Log.d(TAG, "Thread interrupted: abort remaining retries!");
-                                Thread.currentThread().interrupt();
-                            }
-
-                            // increase backoff exponentially
-                            backoff *= 2;
-                        }
-                    }
-                }
-                return msg;
-            }
-
-            @Override
-            protected void onPostExecute(String msg) {
-                //mDisplay.append(msg + "\n");
-            }
-        }.execute(null, null, null);
-    }
-    /**
-     * Sends the registration ID to your server over HTTP, so it can use GCM/HTTP
-     * or CCS to send messages to your app. Not needed for this demo since the
-     * device sends upstream messages to a server that echoes back the message
-     * using the 'from' address in the message.
-     */
-    private boolean sendRegistrationIdToBackend() {
-        // Your implementation here.
-        Log.i(TAG, "The regid is: " + regid);
-        HttpClient httpclient = new DefaultHttpClient();
-        String token  = sharedPreferences.getString("token", "None");
-        boolean success = false;
-        try
-        {
-            JSONObject jsonPost = new JSONObject();
-            jsonPost.put("at", token);
-            jsonPost.put("regid", regid);
-
-            String urlPost = getString(R.string.gcmregid);
-
-            HttpPost httppost = new HttpPost(urlPost);
-            StringEntity se = new StringEntity(jsonPost.toString());
-            httppost.setEntity(se);
-            httppost.setHeader("Accept", "application/json");
-            httppost.setHeader("Content-type", "application/json");
-            HttpResponse response = httpclient.execute(httppost);
-            StatusLine statusLine = response.getStatusLine();
-            int code = statusLine.getStatusCode();
-            if (code == 200)
-            {
-                success = true;
-            }
-
-        } catch (ClientProtocolException e) {
-            Log.i(TAG, e.getMessage());
-        } catch (IOException e) {
-            Log.i(TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.i(TAG, e.getMessage());
-        }
-        return success;
-    }
-    /**
-     * Stores the registration ID and app versionCode in the application's
-     * {@code SharedPreferences}.
-     *
-     * @param context application's context.
-     * @param regId registration ID
-     */
-    private void storeRegistrationId(Context context, String regId) {
-        final SharedPreferences prefs = sharedPreferences;
-        int appVersion = getAppVersion(context);
-        Log.i(TAG, "Saving regId on app version " + appVersion);
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_REG_ID, regId);
-        editor.putInt(PROPERTY_APP_VERSION, appVersion);
-        editor.commit();
     }
 }

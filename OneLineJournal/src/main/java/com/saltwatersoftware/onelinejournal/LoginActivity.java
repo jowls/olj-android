@@ -3,12 +3,10 @@ package com.saltwatersoftware.onelinejournal;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Debug;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -34,7 +32,7 @@ import java.util.List;
 /**
  * Created by j on 01/11/13.
  */
-public class Login extends Activity {
+public class LoginActivity extends Activity {
     
     Button mButton;
     EditText mEditEmail;
@@ -53,7 +51,7 @@ public class Login extends Activity {
         {
             setContentView(R.layout.login);
         }else{
-            Intent myIntent=new Intent(Login.this,MainActivity.class);
+            Intent myIntent=new Intent(LoginActivity.this,MainActivity.class);
             startActivity(myIntent);
             finish();
         }
@@ -117,7 +115,7 @@ public class Login extends Activity {
             Log.w("salt", responseAsText);
             if (responseAsText == "Exception")
             {
-                AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+                AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                 builder.setMessage("Sorry an error occurred. Please check login info and network connection.").setTitle(getString(R.string.addday_error_title));
                 AlertDialog dialog = builder.create();
                 progress.dismiss();
@@ -143,7 +141,7 @@ public class Login extends Activity {
                         finish();
                     }else
                     {
-                        AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                         builder.setMessage(jObject.optString("message", null)).setTitle(getString(R.string.addday_error_title));
                         AlertDialog dialog = builder.create();
                         progress.dismiss();
@@ -151,7 +149,7 @@ public class Login extends Activity {
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
-                    AlertDialog.Builder builder = new AlertDialog.Builder(Login.this);
+                    AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
                     builder.setMessage(e.getMessage()).setTitle(getString(R.string.addday_error_title));
                     AlertDialog dialog = builder.create();
                     progress.dismiss();

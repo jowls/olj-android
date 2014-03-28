@@ -12,7 +12,7 @@ import com.saltwatersoftware.onelinejournal.R;
 /**
  * Created by j on 13/11/13.
  */
-public class AboutFragment extends Fragment {
+public class FragAbout extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.about_fragment, container, false);

@@ -22,7 +22,9 @@ package com.saltwatersoftware.onelinejournal;
         import android.app.PendingIntent;
         import android.content.Context;
         import android.content.Intent;
+        import android.content.SharedPreferences;
         import android.os.Bundle;
+        import android.preference.PreferenceManager;
         import android.support.v4.app.NotificationCompat;
         import android.util.Log;
 
@@ -65,7 +67,12 @@ public class GcmIntentService extends IntentService {
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 // The service might do some work here.
                 // Post notification of received message.
-                sendNotification(extras.getString("message"), extras.getString("title"));
+                Context ctx = getApplicationContext();
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+                if (prefs.getBoolean("push", false)) {
+                    sendNotification(extras.getString("message"), extras.getString("title"));
+                    Log.i(TAG, "Push is set to true, delivering message to phone.");
+                }
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }

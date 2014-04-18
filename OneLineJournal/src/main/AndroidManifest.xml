@@ -24,8 +24,8 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppCompat">
-        <!--android:debuggable="false">-->
+        android:theme="@style/AppCompat"
+        android:debuggable="false">
         <activity
             android:name=".LoginActivity"
             android:label="@string/app_name" >

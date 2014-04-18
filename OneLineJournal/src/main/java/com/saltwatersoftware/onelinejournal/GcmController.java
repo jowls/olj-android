@@ -201,12 +201,15 @@ public class GcmController extends Application{
         Log.i(TAG, "The regid is: " + regid);
         HttpClient httpclient = new DefaultHttpClient();
         String token  = prefs.getString("token", "None");
+        String tz = prefs.getString("timezone", "None");
+        Log.i(TAG, "The time zone is: " + tz);
         boolean success = false;
         try
         {
             JSONObject jsonPost = new JSONObject();
             jsonPost.put("at", token);
             jsonPost.put("regid", regid);
+            jsonPost.put("tz", tz);
 
             String urlPost = getString(R.string.gcmregid);
 

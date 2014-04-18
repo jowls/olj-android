@@ -243,7 +243,6 @@ public class FragJournal extends Fragment {
                 {
                     int id = R.id.jListView;
                     ListView lv = (ListView)vw.findViewById(id);
-                    //listview = (ListView) getView().findViewById(R.id.jListView);
                     listview = lv;
                     listview.setAdapter(new yourAdapter(getView().getContext(), jsonJournal));
                 }
@@ -254,4 +253,3 @@ public class FragJournal extends Fragment {
         }
     }
 }
-

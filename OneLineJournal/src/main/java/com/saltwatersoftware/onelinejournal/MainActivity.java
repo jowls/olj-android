@@ -14,17 +14,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.TimeZone;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks, FragDatePicker.OnDateSelectedListener {
@@ -37,6 +41,8 @@ public class MainActivity extends ActionBarActivity
     public static String content = "";
     public static ProgressDialog jprogress;
     public static FragmentManager fragmentManager;
+    public static ArrayList<String> TZ1;
+    public static ArrayAdapter<CharSequence> adapter;
 
     Context context;
     private GcmController gcmc;
@@ -74,6 +80,28 @@ public class MainActivity extends ActionBarActivity
         helper = new SqlOpenHelper(this);
         database = helper.getWritableDatabase();
         //GCM
+        String[]TZ = TimeZone.getAvailableIDs();
+        TZ1 = new ArrayList<String>();
+        for(int i = 0; i < TZ.length; i++) {
+            if(!(TZ1.contains(TimeZone.getTimeZone(TZ[i]).getID()))) {
+                TZ1.add(TimeZone.getTimeZone(TZ[i]).getID());
+            }
+        }
+        if (sharedPreferences.getString("timezone", "None") == "None") {
+            TimeZone tz = TimeZone.getDefault();
+            Log.i("MAIN", "Time zone is: " + tz.getID());
+            editor.putString("timezone", tz.getID());
+            editor.commit();
+        }
+        adapter = new ArrayAdapter <CharSequence> (this, android.R.layout.simple_spinner_item );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        for(int i = 0; i < MainActivity.TZ1.size(); i++) {
+            adapter.add(MainActivity.TZ1.get(i));
+        }
+        if (!sharedPreferences.contains("push"))
+        {
+            editor.putBoolean("push", true);
+        }
         gcmc = (GcmController) getApplicationContext();
         gcmc.onCreateRegIdTasks(this);
     }
@@ -144,6 +172,12 @@ public class MainActivity extends ActionBarActivity
         }
         else if (position == 3)
         {
+            mTitle = "Settings";
+            FragSettings set = new FragSettings();
+            fragmentManager.beginTransaction().replace(R.id.container, set).commit();
+        }
+        else if (position == 4)
+        {
             mTitle = "Edit Day";
             FragDayEdit def = new FragDayEdit();
             fragmentManager.beginTransaction().replace(R.id.container, def).commit();
@@ -207,6 +241,7 @@ public class MainActivity extends ActionBarActivity
         content = "";
         date = "(Choose date) -->";
         editor.putLong("db_updated", -1);
+        //editor.remove("timezone");
         editor.apply();
         Intent myIntent=new Intent(MainActivity.this,LoginActivity.class);
         startActivity(myIntent);
@@ -282,4 +317,5 @@ public class MainActivity extends ActionBarActivity
         day.setRetainInstance(true);
         fragmentManager.beginTransaction().replace(R.id.container, day).addToBackStack(null).commit();
     }
+
 }

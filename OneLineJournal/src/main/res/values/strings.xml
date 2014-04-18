@@ -5,6 +5,7 @@
     <string name="title_section1">Add Day</string>
     <string name="title_section2">Journal</string>
     <string name="title_section3">About</string>
+    <string name="title_section4">Settings</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="action_example">Log Out</string>
@@ -14,7 +15,10 @@
     <string name="email">Email</string>
     <string name="btn_sign_up">Sign Up</string>
     <string name="login_title">Login to One Line Journal</string>
-    <string name="addday_date">Date:</string><string name="addday_day">Day:</string><string name="addday_pick_date">Change date</string><string name="addday_save">Save Day</string>
+    <string name="addday_date">Date:</string>
+    <string name="addday_day">Day:</string>
+    <string name="addday_pick_date">Change date</string>
+    <string name="addday_save">Save Day</string>
     <string name="addday_success">Thanks! Your day has been created.</string>
     <string name="addday_success_title">Success</string>
     <string name="addday_error">Unspecified error.</string>
@@ -25,6 +29,12 @@
     <string name="about_twitter">\@1linejournal</string>
     <string name="about_email">admin@onelinejournal.org</string>
     <string name="addday_client">Client Protocol Exception</string>
-    <string name="sign_up_note">Sign up for free at www.onelinejournal.org/users/sign_up</string><string name="edit_day_label">Edit day:</string><string name="editDaySubmitButton">Submit Changes</string>
-
+    <string name="sign_up_note">Sign up for free at www.onelinejournal.org/users/sign_up</string>
+    <string name="edit_day_label">Edit day:</string>
+    <string name="editDaySubmitButton">Submit Changes</string>
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="settings_push_notif_text">Allow Reminders</string>
+    <string name="settings_push_notif_on">On</string>
+    <string name="settings_push_notif_off">Off</string>
+    <string name="app_label">OLJ</string>
 </resources>

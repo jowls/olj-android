@@ -73,24 +73,6 @@ public class FragAddDay extends Fragment implements View.OnClickListener {
         }
         return view;
     }
-//    @Override
-//    public void onSaveInstanceState(Bundle savedInstanceState) {
-//
-//        // Save UI state changes to the savedInstanceState.
-//        // This bundle will be passed to onCreate if the process is
-//        // killed and restarted.
-//
-//        savedInstanceState.putString("date", textView.toString());
-//        super.onSaveInstanceState(savedInstanceState);
-//
-//        // etc.
-//
-//    }
-//    @Override
-//    public void onRestoreInstanceState(Bundle savedInstanceState) {
-//        super.onRestoreInstanceState(savedInstanceState);
-//    // Read values from the "savedInstanceState"-object and put them in your textview
-//    }
     @Override
     public void onSaveInstanceState(Bundle outState) {
         // Save the values you need from your textview into "outState"-object
@@ -132,7 +114,7 @@ public class FragAddDay extends Fragment implements View.OnClickListener {
             String content = mContent.getText().toString();
             String token  = sharedPreferences.getString("token", "None");
             String responseAsText = "Exception";
-
+            String tz = sharedPreferences.getString("timezone", "None");
             try {
                 JSONObject jsonDay = new JSONObject();
                 jsonDay.put("date", date);
@@ -140,6 +122,7 @@ public class FragAddDay extends Fragment implements View.OnClickListener {
                 JSONObject jsonPost = new JSONObject();
                 jsonPost.put("at", token);
                 jsonPost.put("day", jsonDay);
+                jsonPost.put("tz", tz);
 
                 String urlPost = getString(R.string.addday);
 
